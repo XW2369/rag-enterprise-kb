@@ -29,6 +29,10 @@ index/
 # Secrets (API keys live here, NEVER commit)
 .env
 
+# Run logs (temporary)
+_*.log
+*.log
+
 # Notes
 手推草稿/
 打卡日志/
