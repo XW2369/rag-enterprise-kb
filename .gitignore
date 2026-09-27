@@ -1,0 +1,36 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Tool caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Data / weights / indexes (never commit large binaries)
+data/
+checkpoints/
+outputs/
+index/
+*.pt
+*.pth
+*.safetensors
+*.arrow
+*.bin
+*.faiss
+
+# Secrets (API keys live here, NEVER commit)
+.env
+
+# Notes
+手推草稿/
+打卡日志/
+Day6-RAG与Agent工程/
+培训专业/

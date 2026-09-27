@@ -1,0 +1,49 @@
+{
+  "n_docs": 98,
+  "n_chunks": 2341,
+  "embedding_model": "BAAI/bge-small-zh-v1.5",
+  "index": "FAISS IndexFlatIP",
+  "top_k": 5,
+  "tier_A_content_derived_upper_bound": {
+    "n_questions": 18,
+    "caveat": "query 取自文档原文连续子串，字面指纹唯一，必然接近满分，仅用于验证链路",
+    "metrics": {
+      "vector": {
+        "recall_at_5": 1.0,
+        "hits": 18,
+        "p95_latency_ms": 16.0
+      },
+      "bm25": {
+        "recall_at_5": 1.0,
+        "hits": 18,
+        "p95_latency_ms": 13.54
+      },
+      "hybrid": {
+        "recall_at_5": 1.0,
+        "hits": 18,
+        "p95_latency_ms": 0.09
+      }
+    }
+  },
+  "tier_B_topic_query": {
+    "n_questions": 20,
+    "caveat": "用文件名主题词构造的模糊 query，有区分度；仍非人工标注真实 query",
+    "metrics": {
+      "vector": {
+        "recall_at_5": 0.45,
+        "hits": 9,
+        "p95_latency_ms": 15.33
+      },
+      "bm25": {
+        "recall_at_5": 0.15,
+        "hits": 3,
+        "p95_latency_ms": 11.48
+      },
+      "hybrid": {
+        "recall_at_5": 0.3,
+        "hits": 6,
+        "p95_latency_ms": 0.09
+      }
+    }
+  }
+}

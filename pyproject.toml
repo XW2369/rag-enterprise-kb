@@ -1,0 +1,25 @@
+[project]
+name = "raglab"
+version = "0.1.0"
+description = "Day6: enterprise knowledge-base RAG + Agent + FastAPI"
+readme = "README.md"
+authors = [
+    { name = "xw", email = "2546656761@qq.com" }
+]
+requires-python = ">=3.11"
+dependencies = []
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
