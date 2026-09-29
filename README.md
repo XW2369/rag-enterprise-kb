@@ -1,13 +1,13 @@
 # 05-企业知识库RAG系统
 
-> Day6（补做）：RAG 全链路 + 手写 ReAct Agent + FastAPI ｜ CPU 环境（无显卡）
-> 语料：本冲刺营 **98 份工程文档**（md / py / txt，92 KB 级）→ **2341 个切片**
+RAG 全链路 + 手写 ReAct Agent + FastAPI ｜ CPU 环境（无显卡）
+语料：**98 份工程文档**（md / py / txt，92 KB 级）→ **2341 个切片**
 
 ---
 
 ## 一、它解决什么问题
 
-把「7 天积累的全部工程文档」变成一个可检索的知识库：
+把分散的工程文档变成一个可检索的知识库：
 **给一句话提问，返回最相关的文档片段**，并支持 Agent 以 ReAct 方式多步检索。
 
 ---
@@ -90,46 +90,29 @@ curl.exe -X POST http://127.0.0.1:8000/ask -H "Content-Type: application/json" -
 | BM25（字面） | **0.1500** | 9.00 ms |
 | 混合（RRF 融合） | **0.3000** | 0.08 ms |
 
-> ⚠️ **混合检索未优于纯向量**，这是实测结果，不做美化。归因与改进方向见 `reports/recall.md`。
+> 混合检索（RRF）在 B 层**未优于纯向量**，归因分析与改进方向见 `reports/recall.md`。
 
 ---
 
-## 五、诚实声明（面试前必读）
+## 五、实现说明与已知限制
 
-1. **未接大模型生成。** 本项目走「检索 + 返回片段」路径（抽取式），**没有接 LLM 做答案生成**。
-   → **简历上只能写「检索 + 片段召回」，不许写「生成式问答」或「RAG 问答系统」。**
-2. **`react.py` 的 `Thought` 是占位实现。** 因无 LLM API，`thought` 由 `RuleBasedLLM` 用**关键词规则**产出，
-   不是语言模型推理。**ReAct 的循环结构、工具调用、Observation 回灌、步数截断均为真实运行。**
-   换成真 API（`OpenAICompatLLM`）即为完整 Agent。
-3. **评估集是脚本构造的，不是人工标注。**
+1. **未接大模型生成。** 本项目走「检索 + 返回片段」的抽取式路径，未接入 LLM 做答案生成。
+2. **`react.py` 的 `Thought` 是规则占位。** 因未接入 LLM API，`thought` 由 `RuleBasedLLM` 依据关键词规则产出，
+   并非语言模型推理。**ReAct 的循环结构、工具调用、Observation 回灌、步数截断均为真实运行，**
+   替换 `OpenAICompatLLM` 后即为完整 Agent。
+3. **评估集由脚本构造，非人工标注。**
    - A 层「内容派生」：query 取自文档原文连续子串 → 三个方法必然满分，**无区分度**，仅用于验证链路可用
    - B 层「主题型 query」：用文件名主题词构造，有区分度，但仍**不是**真实用户 query
    → 改进方向：人工标注 20–50 条真实 query 后再评
-4. **代码来源**：`load_docs.py` 的扫描结构、`chunk.py` 的 `recursive_chunk` 算法主体由学员实现；
-   `embed_index.py` / `retrieve.py` / `react.py` / `api.py` / `scripts/*` / `tests/*` 由教练提供（学员逐行读懂并调通）。
-5. **数据未入库**：`data/` 已被 `.gitignore` 排除（索引与切片需本地重建）。
+4. **索引与切片未随代码分发**：`data/` 已被 `.gitignore` 排除，需按上方「快速开始」在本地重建。
 
 ---
 
-## 六、已排掉的坑（供复用）
+## 六、Roadmap
 
-| 坑 | 现象 | 解法 |
-|---|---|---|
-| HF 镜像抖动卡启动 | `WinError 10060` 重试 5 次 | `HF_HUB_OFFLINE=1` + `TRANSFORMERS_OFFLINE=1`（模型已缓存则强制离线） |
-| FAISS 写中文绝对路径 | `could not open ... for writing` | `faiss.serialize_index()` + Python `write_bytes` |
-| BGE 召回偏低 | — | 查询侧加前缀 `为这个句子生成表示以用于检索相关文章：`，文档侧不加 |
-| 中英混合语料 BM25 失效 | 英文词被拆成字母 | 分词用 `[A-Za-z0-9_]+` 整词 + CJK 单字，**语料与查询必须同一 tokenizer** |
-| `s.split("")` | `ValueError: empty separator` | 末级分隔符改为定长硬切 + overlap |
-| uv venv 无 pip | `No module named pip` | 用 `uv pip install` |
-| PowerShell 的 `curl` | 参数报错 | 写 `curl.exe` |
-
----
-
-## 七、改进方向（TODO）
-
-1. 接 LLM API，把「检索」升级为真正的「检索增强生成」
-2. 加 reranker（`bge-reranker`）对 top-50 重排
-3. RRF 两路加权（向量权重更高），或换 weighted fusion
-4. 中文分词改用 jieba，提升 BM25 质量
-5. 人工标注 20–50 条真实 query，重做评估
-6. `Dockerfile` + `docker-compose.yml`（本次未做）
+- [ ] 接入 LLM API，把「检索」升级为「检索增强生成」
+- [ ] 引入 reranker（`bge-reranker`）对 top-50 重排
+- [ ] RRF 改为两路加权融合（提升向量侧权重），或改为 weighted fusion
+- [ ] 中文分词改用 jieba，提升 BM25 召回
+- [ ] 人工标注 20–50 条真实 query，重建评估集
+- [ ] 补充 `Dockerfile` + `docker-compose.yml`
